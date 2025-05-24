@@ -2,7 +2,7 @@ export function handleSignup() {
   const signupForm = document.getElementById('signupForm')
   if (!signupForm) return
 
-  signupForm.onsubmit = (e) => {
+  signupForm.onsubmit = async (e) => {
     e.preventDefault()
 
     const name = signupForm.name.value.trim()
@@ -42,7 +42,27 @@ export function handleSignup() {
       return
     }
 
-    alert(`Registrado com sucesso!\nNome: ${name}\nEmail: ${email}`)
-    signupForm.reset()
+    // Dados validados, enviando para a API
+    try {
+      const response = await fetch('/registro', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, email, password })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        alert(`Erro ao registrar: ${errorData.message || 'Tente novamente mais tarde.'}`)
+        return
+      }
+
+      alert(`Registrado com sucesso!\nNome: ${name}\nEmail: ${email}`)
+      signupForm.reset()
+    } catch (error) {
+      alert('Erro na comunicação com o servidor. Tente novamente mais tarde.')
+      console.error(error)
+    }
   }
 }
