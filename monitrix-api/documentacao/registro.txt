@@ -1,5 +1,0 @@
-2025/05/25 21:02:06 Novo registro: Nome=Maria Oliveira, Email=maria123@outlook.com
-2025/05/25 21:33:12 Novo registro: Nome=Mariaa Oliveira, Email=maria1as23@outlook.com
-2025/05/26 03:29:38 Novo registro: Nome=joao da costa e silva, Email=jcdevinho@outlook.com
-2025/05/26 03:33:55 Novo registro: Nome=joao costa e matos, Email=teste@gmail.com
-2025/05/26 03:37:34 Novo registro: Nome=opapappap, Email=testando@gmail.com
