@@ -1,3 +1,15 @@
+function showToast(msg, type = 'success') {
+  Toastify({
+    text: msg,
+    duration: 4000,
+    gravity: "top",
+    position: "right",
+    backgroundColor: type === 'success' ? "#4caf50" : "#f44336", // verde ou vermelho
+    stopOnFocus: true,
+    close: true
+  }).showToast()
+}
+
 export function handleSignup() {
   const signupForm = document.getElementById('signupForm')
   if (!signupForm) return
@@ -9,22 +21,18 @@ export function handleSignup() {
     const email = signupForm.email.value.trim()
     const password = signupForm.password.value
 
-    const nameRegex = /^[A-Za-zÀ-ÿ\s]{1,45}$/ // letras com acento e espaço
+    const nameRegex = /^[A-Za-zÀ-ÿ\s]{1,45}$/
     const hasNumber = /\d/
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/ // estrutura básica
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     const allowedDomains = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'yandex.com', 'zoho.com']
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/
 
-    // Validação do nome
     if (!name || !nameRegex.test(name) || hasNumber.test(name)) {
-      alert('Nome inválido. Use apenas letras (com acento) e espaços. Máximo de 45 caracteres. Não use números ou símbolos.')
-      return
+      return showToast('Nome inválido. Use apenas letras e espaços.', 'error')
     }
 
-    // Validação do email
     if (!emailRegex.test(email) || email.includes(' ')) {
-      alert('Email inválido.')
-      return
+      return showToast('Email inválido.', 'error')
     }
 
     const domain = email.split('@')[1]
@@ -32,37 +40,31 @@ export function handleSignup() {
     const isCorporate = domain.endsWith('.com.br') && domain.split('.')[0].length >= 10
 
     if (!isAllowedDomain && !isCorporate) {
-      alert('Use um email válido como Gmail, Outlook, etc., ou um domínio corporativo com pelo menos 10 caracteres antes do .com.br')
-      return
+      return showToast('Use um email válido como Gmail ou domínio corporativo com 10+ letras.', 'error')
     }
 
-    // Validação da senha
     if (!passwordRegex.test(password)) {
-      alert('Senha fraca. Use pelo menos 8 caracteres, com 1 maiúscula, 1 minúscula, 1 número e 1 símbolo.')
-      return
+      return showToast('Senha fraca. Use ao menos 8 caracteres, maiúscula, número e símbolo.', 'error')
     }
 
-    // Dados validados, enviando para a API
     try {
       const response = await fetch('/registro', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ name, email, password })
       })
 
       if (!response.ok) {
         const errorData = await response.json()
-        alert(`Erro ao registrar: ${errorData.message || 'Tente novamente mais tarde.'}`)
-        return
+        return showToast(`Erro: ${errorData.message || 'Tente novamente.'}`, 'error')
       }
 
-      alert(`Registrado com sucesso!\nNome: ${name}\nEmail: ${email}`)
+      showToast(`Registrado com sucesso!`, 'success')
       signupForm.reset()
     } catch (error) {
-      alert('Erro na comunicação com o servidor. Tente novamente mais tarde.')
       console.error(error)
+      showToast('Erro de comunicação com o servidor.', 'error')
     }
   }
 }
