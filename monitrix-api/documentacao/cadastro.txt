@@ -1,0 +1,168 @@
+📌 Arquivo por Arquivo
+🔹 main.go – Ponto de entrada da aplicação
+Responsabilidade:
+
+Inicializa a aplicação Echo
+
+Conecta ao banco (via utils.InitDB)
+
+Registra middlewares globais (logger, recover)
+
+Chama as rotas
+
+Erros comuns:
+
+Porta ocupada (:8080)
+
+Falha na conexão com o banco (verifique DSN em utils/db.go)
+
+🔹 routes/routes.go – Definição de rotas da API
+Responsabilidade:
+
+Centraliza todas as rotas da API
+
+Define o que acontece quando o cliente faz uma requisição a /registro
+
+
+e.POST("/registro", controllers.RegisterUser)
+Erros comuns:
+
+Rota não registrada (se SetupRoutes() não for chamada em main.go)
+
+🔹 controllers/auth_controller.go – Lógica de negócio do registro
+Responsabilidade:
+
+Recebe os dados da requisição
+
+Valida os campos (nome, e-mail, senha)
+
+Verifica duplicidade de e-mail no banco
+
+Criptografa a senha com bcrypt
+
+Salva no banco de dados
+
+Gera cookie HttpOnly
+
+Grava log em arquivo .txt
+
+Retorna resposta JSON ao frontend
+
+Erros comuns:
+
+Validação falha? Ver regex
+
+Banco não insere? Verifique se a tabela users existe e se os tipos são compatíveis
+
+Cookie não é salvo? Verifique se o navegador aceita cookies e se o backend está na mesma origem
+
+🔹 models/user.go – Estrutura de dados (modelo)
+Responsabilidade:
+
+Define a estrutura do usuário (User)
+
+Serve como base para transferência de dados entre camadas
+
+
+type User struct {
+	ID       int
+	Name     string
+	Email    string
+	Password string
+}
+Erros comuns:
+
+Campos ausentes ou incompatíveis durante Decode (verifique nomes dos campos JSON)
+
+🔹 utils/db.go – Conexão com o banco de dados
+Responsabilidade:
+
+Cria a conexão com o MySQL
+
+Expõe a variável global utils.DB para uso em toda a aplicação
+
+Erros comuns:
+
+Falha de login ou senha
+
+Host ou porta incorretos
+
+Banco inexistente
+
+🛠 Exemplo de DSN:
+
+
+dsn := "usuario:senha@tcp(localhost:3306)/seubanco?parseTime=true"
+🔹 middlewares/auth.go – Proteção de rotas
+Responsabilidade:
+
+Verifica se o usuário possui um cookie auth_token
+
+Caso contrário, bloqueia o acesso à rota protegida
+
+
+cookie, err := c.Cookie("auth_token")
+Erros comuns:
+
+Cookie não enviado pelo navegador (não persistido, mal configurado)
+
+Middleware não aplicado na rota
+
+🔹 logs/registro.txt – Log de registros
+Responsabilidade:
+
+Grava o nome e o email de cada usuário registrado, com timestamp
+
+Útil para auditoria e debug
+
+
+logs/registro.txt
+Erros comuns:
+
+Pasta logs não existe (o código já cria automaticamente com os.MkdirAll)
+
+Permissões negadas para gravar (Linux/macOS pode precisar de chmod)
+
+🧪 Fluxo de Execução Completo
+O usuário preenche o formulário e envia os dados.
+
+O frontend envia uma requisição POST para /registro com nome, email e senha.
+
+O Echo chama o controller RegisterUser.
+
+O controller:
+
+Faz as validações
+
+Verifica se o email já existe
+
+Criptografa a senha
+
+Insere o usuário no banco
+
+Gera cookie HttpOnly
+
+Registra log no arquivo
+
+Retorna uma resposta com status 200 ou erro
+
+🛡 Segurança
+Validações no backend: nunca confie só no front
+
+Senha criptografada com bcrypt
+
+Cookie com HttpOnly + SameSite
+
+Verificação de e-mail duplicado
+
+Logs para rastreabilidade
+
+✅ Checklist de Funcionamento
+Componente	Está OK?	Possível erro ao falhar
+Banco MySQL	✅	DSN errado, banco ausente, senha incorreta
+Conexão DB	✅	sql.Open com erro
+Rota /registro	✅	Não registrada ou com handler errado
+Validações	✅	Regex mal formada, campos ausentes
+Criptografia	✅	Falha em bcrypt.GenerateFromPassword
+Cookie HttpOnly	✅	Browser bloqueando, domínio errado
+Logs .txt	✅	Sem permissão de escrita, pasta inexistente
